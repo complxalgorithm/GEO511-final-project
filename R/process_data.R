@@ -15,7 +15,9 @@ library(gridExtra)
 library(reshape2)
 library(here)
 
-census_api_key("1127cdcdf329b894af0f6fe4bad3a4a8412c7dcc")
+# pull in census api token
+census_token = Sys.getenv("CENSUS_TOKEN")
+census_api_key(census_token)
 
 ###########################################
 # SET UP & MAP OF STUDY AREA
