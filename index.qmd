@@ -1,43 +1,60 @@
 ---
-title: "Analyzing Population and Land Cover Changes in NY Appalachia (2010-2019)"
+title: "Analyzing Distressed Population and Land Cover Changes in New York Appalachia (2010-2019)"
 subtitle: 'GEO511'
 author: Stephen C. Sanders
 date: today
 date-format: long
 format:
   html:
-    self-contained: true
+    smooth-scroll: true
     toc: true
     toc-location: left
     toc-title: 'Table of Contents'
     code-fold: true
-execute:
-  cache: true
+    code-tools: true
 ---
 
 # Introduction
 
-The Southern Tier of New York consists of fourteen counties that are considered part of Northern Appalachia, according to the Appalachian Regional Commission. These counties have experienced some of the most drastic population declines in New York State outside of New York City (McMahon, 2024). On top of the decline in population, some areas in most of the Southern Tier suffer from relatively high poverty and low income levels compared to the rest of the United States as a whole (ARC, 2024 County-Level Distressed Area Study).
+The Southern Tier of New York consists of fourteen counties that are considered part of Northern Appalachia, according to the Appalachian Regional Commission. These counties have experienced some of the most drastic population declines in New York State outside of New York City (McMahon, 2024). On top of the decline in population, communities in much of the Southern Tier suffer from relatively high poverty and low income levels compared to the rest of the United States as a whole (ARC, 2024 County-Level Distressed Area Study).
 
 ![Map of three subregions in Appalachian NY (NY Department of State)](https://dos.ny.gov/sites/g/files/oee926/files/styles/wysiwyg/public/media/2021/04/arc-map-.png?itok=Jf3ZpQA9){fig-alt="Map of three subregions of the New York Southern Tier region."}
 
-Some areas in Appalachia - namely Eastern Kentucky - have undergone extensive land reclamation efforts in an attempt to repair land that had been damaged during the era of intense coal mining operations, converting much of the reclaimed land into infrastructure, industry, and other development despite consistent population decline (KC, Gyawali, Lucas, et al., 2024). Coal mining was not a large industry in this area at any time, and much of the manufacturing was limited to cities such as Jamestown and Binghampton. While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York's Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are counties with a higher change in distressed population more likely to have had an increase in natural barren land and/or a decrease in developed area?
+Some areas in Appalachia - namely Eastern Kentucky - have undergone extensive land reclamation efforts in an attempt to repair land that had been damaged during the era of intense coal mining operations, converting much of the reclaimed land into infrastructure, industry, and other development despite consistent population decline (KC, Gyawali, Lucas, et al., 2024). Coal mining was not a large industry in this area at any time, and much of the manufacturing was limited to cities such as Jamestown and Binghamton.
+
+While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York’s Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are counties and census tracts with a higher change in distressed population more likely to have had an increase in natural barren land and/or a decrease in developed area?
 
 # Materials and Methods
 
-\[\~ 200 words\]
+The analysis looked at various population-related variables. Specifically, data concerning total population, total households, median age, median family income, number of people below the poverty level, unemployment among civilian workforce over the age of 16, and households with no vehicles were pulled and/or aggregated at the U.S., county, and census tract levels. 
 
-Narrative: Clear narrative description of the data sources and methods. Includes data from at least two sources that were integrated / merged in R.
+Census data was pulled for years between 2010 and 2019. All data was gathered using the [tidycensus](https://walker-data.com/tidycensus/) package, and a majority of it came from American Community Survey (ACS) 5-year estimates. U.S. data for 2010 had to be pulled from the decennial census since ACS data was not available for this year at the country-level. Data for years other than 2010 and 2019 were pulled to allow for additional analysis in the future.
 
-Code: The code associated with the project is well organized and easy to follow. Demonstrates mastery of R graphics and functions.
+Primary land cover data for 2010 and 2019 comes from the [USGS](https://www.usgs.gov/special-topics/lcmap/collection-13-conus-science-products) LCMAP project and were downloaded from the [CONUS Mosaic](https://eros.usgs.gov/lcmap/apps/data-downloads) website. This data was processed using the [terra](https://rspatial.github.io/terra/) package.
 
-Data: The underlying data are publicly accessible via the web and downloaded/accessed within the Rmd script. If you want to use your own data, you must make it available on a website (e.g. Figshare) so that others are able to re-run your code.
+The methodology used to determine distressed status of each census tract was taken from the Distressed Areas Classification System used by the [Appalachian Regional Commission](https://www.arc.gov/distressed-areas-classification-system/). According to the ARC, the key attributes of a distressed census tract are:
 
-You can do numbers like this:
+1. A median family income no greater than 67% of the U.S. average.
+2. A poverty rate of 150% of the U.S. average or greater.
 
-1.  The first most important thing
-2.  The second most important thing
-3.  The third most important thing
+The [tidyverse](https://www.tidyverse.org/) collection of packages was primarily used to easily process large amount of data. The [tigris](https://github.com/walkerke/tigris) package was used directly to pull study counties and census tracts to create a map of the study area. The [sf](https://r-spatial.github.io/sf/) package helped with processing spatial features, including data pulled from the ACS. The maps were created using either [leaflet](https://rstudio.github.io/leaflet/), [mapview](https://r-spatial.github.io/mapview/), or [ggplot2](https://ggplot2.tidyverse.org/). The [gt](https://gt.rstudio.com/) package allowed for the creation of better looking tables.
+
+## An Overview of the Analysis Workflow
+
+Below is an outline of how the analysis was conducted:
+
+1. Create a map of study area for reference.
+2. Pull Census data at US, census tract, and county levels for years between 2010 and 2019, then simplify datasets so only variables for the years 2010 and 2019 are included.
+    + Certain data at the tract level (e.g., median family income) could not simply be aggregated to include in the county-level dataset, which required pulling that data separately at the county level.
+    + U.S. data was pulled for comparison purposes in the distressed population analysis.
+    + U.S. data for 2010 had to be sourced from governmental reports since they were not available for direct download using the tidycensus package. The only variable that was pulled using tidycensus in this case was total population.
+    + Data for 2015 are also included in the consolidated datasets for the purposes of future work. They do not have any relevance to the analysis at this time.
+3. Download land cover datasets for years 2010 and 2019, then show side-by-side plot of both images. Show map of areas where the land cover type has changed between the years.
+4. Calculate zonal statistics of each of the 8 land cover classifications over the entire study area, then create a table and bar graph showing the changes in each of the classifications between 2010 and 2019.
+5. Determine distressed status of each of the census tracts for each year using criteria from the ARC by comparing median family income and poverty levels to the U.S. values. Determine which census tracts improved (i.e., were distressed in 2010 and no longer distressed in 2019) and which census tracts became distressed. Create maps to show tracts that improved and tracts that became distressed. Also show table breakdown by county of the number of tracts that became distressed and the number of tracts that improved.
+6. Merge base data variables, distressed variable data, and land cover classification data into single datasets at both the census tract and county levels. Calculate percent changes between 2010 and 2019 for each variable in each of the datasets. Create tables for both to show the percent changes by census tract and by county.
+7. Run basic correlation analysis on census tract-level dataset to figure out relationships between variables, and create a heatmap of correlation results. Lastly, create a table of correlation results between the percentage change in distressed population and all other percentage change variables.
+    + Since there are only 14 counties, a county-level correlation analysis would have a very large margin of error. For this reason, this step was only done on the census tract-level data.
 
 # Data Gathering and Processing
 
@@ -69,9 +86,9 @@ census_api_key(census_token)
 
 ## Map of Study Area
 
-Add some text here
+The map below shows the 14 counties in New York's Southern Tier (Allegany, Broome, Cattaraugus, Chautauqua, Chemung, Chenango, Cortland, Delaware, Otsego, Schoharie, Schuyler, Steuben, Tioga, and Tompkins) and all 277 census tracts.
 
-```{r study_area_map, message=F, warning=F}
+```{r study_area_map, message=F, warning=F, error=F}
 # increase timeout time to download files and cache tigris files
 options(timeout = 500, tigris_use_cache = TRUE)
 
@@ -101,15 +118,11 @@ study_area_map
 
 ## Download and Process All Required Data
 
-Add some text here
+Census data and land cover data are downloaded and processed here. The census data comes primarily from the American Community Survey (ACS) 5-year surveys, and the land cover data comes from the USGS.
 
 ### ACS Data
 
-Add some text here
-
 #### Set function to download ACS data based on geography
-
-Add some text here
 
 ```{r get_acs_func, message=F, warning=F}
 # create function to download acs data for multiple years
@@ -131,7 +144,8 @@ get_acs_data <- function(year, geom) {
         geometry = TRUE,
         year = year,
         output = 'wide',
-        cache_table = TRUE
+        cache_table = TRUE,
+        key = census_token
       ) %>%
         mutate(
           year = year,
@@ -153,7 +167,8 @@ get_acs_data <- function(year, geom) {
         geometry = TRUE,
         year = year,
         output = 'wide',
-        cache_table = TRUE
+        cache_table = TRUE,
+        key = census_token
       ) %>%
         mutate(
           year = year,
@@ -176,7 +191,8 @@ get_acs_data <- function(year, geom) {
         geometry = TRUE,
         year = year,
         output = 'wide',
-        cache_table = TRUE
+        cache_table = TRUE,
+        key = census_token
       ) %>%
         mutate(
           year = year
@@ -187,8 +203,6 @@ get_acs_data <- function(year, geom) {
 ```
 
 #### US Data
-
-Add some text here
 
 ```{r us_data, message=F, warning=F, cache=T}
 # get certain decennial 2010 census data at state level
@@ -258,18 +272,30 @@ us_data.2010_2019 <-
 
 #### Census Tract Data
 
-Add some text here
-
-```{r tract_data, message=F, warning=F, cache=T}
+```{r tract_data_map, message=F, warning=F, cache=T}
 # get census tract data for 2010-2019
 # isolate data for 2010, 2015, and 2019 and put into separate dfs
 st_tracts <- map2(2010:2019, rep('tract', times = 10), get_acs_data) %>% 
   bind_rows() %>% 
   as_tibble()
 
+# show point plot of median income and pct below poverty level for each year
+# colored by county
+ggplot(st_tracts, aes(median_incomeE, pct_below_poverty, color = county)) +
+  geom_jitter(na.rm = TRUE) +
+  facet_wrap(~year) +
+  labs(x = 'Median Income', y = '% Below Poverty Level', color = 'County') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+There is a clear negative relationship between median family income and percent below poverty level, where tracts that have higher median family incomes tend to have a lower percentage of people below poverty. Most of the outliers for each year are in Allegany County.
+
+##### Remaining Census Tract Data
+
+```{r tract_remaining, message=F, warning=F, cache=T}
 # get economic data (unemployed civilians > 16) for 2010-2019
-# 2018 stopped working
-st_tracts.economic <- map(c(2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019), function(x) {
+# data for 2018 returned a server error
+st_tracts.economic <- map(c(2010, 2011, 2013, 2014, 2015, 2016, 2017, 2019), function(x) {
   return(
     get_acs(
       geography = 'tract',
@@ -278,7 +304,8 @@ st_tracts.economic <- map(c(2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019
       geometry = TRUE,
       year = x,
       output = 'wide',
-      cache_table = TRUE
+      cache_table = TRUE,
+      key = census_token
     ) %>%
       rename(
         'pop_gt_16_in_civilian_labor_force_{x}' := DP03_0003E,
@@ -366,8 +393,6 @@ st_tracts.2010_2019 <-
 ```
 
 #### County Data
-
-Add some text here
 
 ```{r county_data, message=F, warning=F, cache=T}
 # pull southern tier county data and calculate area in square miles
@@ -463,13 +488,9 @@ st_counties.2010_2019 <-
 
 ### Land Cover Data
 
-Add some text here
-
 #### Land Cover Set Up
 
-Add some text here
-
-```{r land_cover_setup, message=F, warning=F}
+```{r land_cover_setup, message=F, warning=F, error=F}
 # set urls to land cover images
 url_2010 <- 'https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/lcmap/public/full_extent_downloads/version_13/primary-landcover_conus_year_data/LCMAP_CU_2010_V13_LCPRI/LCMAP_CU_2010_V13_LCPRI.tif'
 url_2019 <- 'https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/lcmap/public/full_extent_downloads/version_13/primary-landcover_conus_year_data/LCMAP_CU_2019_V13_LCPRI/LCMAP_CU_2019_V13_LCPRI.tif'
@@ -526,8 +547,7 @@ zonal_stats_2019_study_area <- calculate_zonal_stats(st_lc_2019_masked)
 
 #### Land Cover Processing and Change Calculation
 
-Add some text here
-FOR ENTIRE 14-COUNTY STUDY AREA COMBINED
+This section pertains to land cover over the entire 14-county study area. The interpretation of the land cover images' pixel values and corresponding land cover classes were taken from p. 7 of the [LCMAP Collection 1.3 Data Format Control Book](https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-2346%20Land%20Change%20Monitoring%2C%20Assessment%2C%20and%20Projection%20%28LCMAP%29%20Collection%201.3%20Data%20Format%20Control%20Book%20%28DFCB%29%20-v1.0%20%202022_07_12.pdf).
 
 ```{r land_cover_maps, message=F, warning=F}
 # create data base of land cover descriptions and their colors
@@ -565,12 +585,9 @@ lc_2019_plt <- create_lc_plot(st_lc_2019_masked, 2019)
 gridExtra::grid.arrange(lc_2010_plt, lc_2019_plt, ncol = 1)
 ```
 
-The images would not suggest any major land cover changes
+Areas shown in black in the map below are areas where the land cover has changed between 2010 and 2019. The actual change in classification is not depicted.
 
-Add some text here
-Areas shown in black are areas where the land cover has changed between 2010 and 2019
-
-```{r land_cover_chg_map, message=F, warning=F}
+```{r land_cover_chg_map, message=F, warning=F, cache=T}
 # compare 2019 and 2010 land cover images to see where changes occurred
 chg <- (st_lc_2019_masked == st_lc_2010_masked)
 
@@ -586,17 +603,17 @@ leaflet() %>% addTiles %>%
               color = 'red', opacity = 1, weight = 1, fillOpacity = 0)
 ```
 
-Add some text here
-
 ```{r land_cover_chg_table, message=F, warning=F}
 # land cover changes from 2010 to 2019 in entire study area
 land_cover_chg_study_area.2010_2019 <- left_join(
   zonal_stats_2010_study_area, zonal_stats_2019_study_area,
   by = 'land_cover_category', suffix = c('_2010', '_2019')
 ) %>%
-  mutate(chg_in_area_sqmi = ((area_sqmi_2019 - area_sqmi_2010) / area_sqmi_2010) * 100)
-
-### CREATE GT TABLE OF ABOVE LAND COVER CHANGE DF
+  mutate(
+    pct_of_tot_area_2010 = (area_sqmi_2010 / sum(area_sqmi_2010)) * 100,
+    pct_of_tot_area_2019 = (area_sqmi_2019 / sum(area_sqmi_2019)) * 100,
+    chg_in_area_sqmi = ((area_sqmi_2019 - area_sqmi_2010) / area_sqmi_2010) * 100
+  )
 
 # convert land_cover_type vector into a dataframe to merge with land_cover_chg data frame
 # so land cover descriptions are included
@@ -623,27 +640,32 @@ lc_chg.2010_2019 %>%
   cols_label(
     area_sqmi_2010 = md('**Area (2010)**'),
     area_sqmi_2019	= md('**Area (2019)**'),
+    pct_of_tot_area_2010 = md('**% of Area (2010)**'),
+    pct_of_tot_area_2019 = md('**% of Area (2019)**'),
     chg_in_area_sqmi = md('**% Change**')
   ) %>%
   fmt_number(columns = c('area_sqmi_2010', 'area_sqmi_2019'), decimals = 1) %>%
-  fmt_percent(columns = c('chg_in_area_sqmi'), decimals = 2, scale_values = FALSE)
+  fmt_percent(columns = c('pct_of_tot_area_2010', 'pct_of_tot_area_2019', 
+                          'chg_in_area_sqmi'), decimals = 2, scale_values = FALSE)
+
+# create bar graph of land cover change between 2019 and 2019
+ggplot(lc_chg.2010_2019, aes(x = land_cover_desc, y = chg_in_area_sqmi)) +
+  geom_col(fill = 'blue') +
+  labs(x = 'Land Cover Type', y = '% Change (sq mi)',
+       title = 'Change in Area by Land Cover Classification') +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Add some text
+A majority of the study area is covered by trees and cropland, with much smaller amounts of other land cover classes. The images of land cover change in 2010 and 2019 would not suggest any major land cover changes between that time period. There was an over 13% (about 3.4 square miles) increase in natural barren land and an almost 3% (about 2.9 square miles) decrease in grassland/shrubland. There were very small changes in other land cover types, and no snow and ice cover in either of the two years.
 
 # Results
 
-\[\~200 words\]
+The final analysis involved calculating the number of people who live in distressed areas. Using the criteria defined in the ARC's Distressed Areas Classification System, the distressed status of each census tract was determined for 2010 and 2019. Using these statuses, it was then possible to see if each census tract improved or became distressed within the same time period. This data was used to figure out how many people lived in distressed areas in each county. The area of each land cover classification was then calculated for each census tract and county.
 
-Tables and figures (maps and other graphics) are carefully planned to convey the results of your analysis. Intense exploration and evidence of many trials and failures. The author looked at the data in many different ways before coming to the final presentation of the data.
-
-Show tables, plots, etc. and describe them.
+The above data was combined into separate data frames for census tracts and counties. The percentage change of each study variable was also calculated. Small correlation analyses were conducted to determine relationships between any of the percentage change variables at both the tract and county level and the correlation coefficients were visualized using a heat map. Separate tables were created to see if the percentage change in number of distressed people was related to any of the other percentage change variables.
 
 ## Distressed Area Analysis
-
-Add some text here
-
-Classification criteria comes from: https://www.arc.gov/distressed-areas-classification-system/
 
 ```{r distressed_setup, message=F, warning=F}
 # get list of columns that are involved in distressed area classification
@@ -669,11 +691,62 @@ st_tracts.distressed <-
 distressed.tab <- 
   st_tracts.distressed %>%
   select(GEOID, NAME, county, grep('Distressed', colnames(st_tracts.distressed), value = TRUE))
+
+# map which tracts were distressed in 2010
+mapview(
+  distressed.tab, 
+  zcol = 'if_Distressed_2010',
+  alpha.regions = 0.5,
+  popup = "NAME",
+  layer.name = c("Distressed (2010)")
+)
+
+# map which tracts were distressed in 2010
+mapview(
+  distressed.tab, 
+  zcol = 'if_Distressed_2019',
+  alpha.regions = 0.5,
+  popup = "NAME",
+  layer.name = c("Distressed (2019)")
+)
+
+# create table of number of worsened and improved tracts by county, then display
+distressed.tab %>%
+  group_by(county) %>%
+  summarize(
+    tot_tracts = n(),
+    across(
+      grep('2010', colnames(.), value = TRUE),
+      \(x) sum(x, na.rm = TRUE)
+    ),
+    across(
+      grep('2019', colnames(.), value = TRUE),
+      \(x) sum(x, na.rm = TRUE)
+    )
+  ) %>%
+  st_drop_geometry() %>%
+  relocate(if_Distressed_2019, .after = if_Distressed_2010) %>%
+  arrange(desc(tot_tracts)) %>%
+  gt() %>%
+  cols_label(
+    county = md('**County**'),
+    tot_tracts = md('**# Tracts**'),
+    if_Distressed_2010 = md('**Distressed (2010)**'),
+    if_Distressed_2019 = md('**Distressed (2019)**'),
+    if_Became_Distressed_2010_2019 = md('**Became Distressed**'),
+    if_Distressed_Then_Improved_2010_2019 = md('**Distressed Then Improved**')
+  )
 ```
 
-Add some text here
+Across the study area there were 39 census tracts (14.1%) that were distressed in 2019, an increase from the 22 census tracts (7.9%) that were distressed in 2010. Nine of the fourteen counties had census tracts that became distressed, while only two counties had a tract that improved. In total, 20 census tracts (7.2%) became distressed and only 2 census tracts (0.7%) improved. Cortland County had the largest percentage of census tracts that became distressed (16.7%), followed by Allegany County (15.4%) and Chautauqua County (11.4%).
 
-```{r became_distressed_tracts, message=F, warning=F, cache=T}
+Most cities in the Southern Tier are at least mostly distressed in terms of number of distressed census tracts. The only cities that did not have distressed areas are Ithaca (Tompkins County) and Oneonta (Otsego County). In contrast, Binghamton, Jamestown, Dunkirk, and Elmira were all significantly distressed.
+
+Otsego, Tioga, Schoharie, and Schuyler Counties had no distressed census tracts in 2010 or 2019. Tompkins County had 1 census tract that was distressed in 2010, but its distressed status could not be determined in 2019.
+
+The map below shows the census tracts that became distressed between 2010 and 2019.
+
+```{r became_distressed_tracts, message=F, warning=F}
 # map which tracts became distressed between 2010 and 2019
 mapview(
   distressed.tab, 
@@ -684,9 +757,22 @@ mapview(
 )
 ```
 
-Add some text here
+There are a few census tracts that do not appear on the map, although their popup labels work. The table below shows the three census tracts that have an "NA" value in the "if_Became_Distressed_2010_2019" column. These three tracts are missing at least 1 data point that was used to determine distressed status.
 
-```{r improved_tracts, message=F, warning=F, cache=T}
+```{r NA_distressed_tracts, message=F, warning=F}
+# display median income and pct below poverty data data for tracts
+# that have NA 'if_Became_Distressed_2010_2019' value
+st_tracts.distressed %>%
+  filter(is.na(if_Became_Distressed_2010_2019)) %>%
+  select(NAME, median_incomeE_2010, median_incomeE_2019, 
+         pct_below_poverty_2010, pct_below_poverty_2019) %>%
+  st_drop_geometry() %>%
+  gt()
+```
+
+The map below shows the census tracts that were distressed in 2010 and were no longer distressed in 2019.
+
+```{r improved_tracts, message=F, warning=F}
 # map which tracts improved between 2010 and 2019
 mapview(
   distressed.tab, 
@@ -697,49 +783,41 @@ mapview(
 )
 ```
 
-Add some text here
+As is the case with census tracts that became distressed, some of the tracts do not show up. The table below shows which tracts have an "NA" value in the 'if_Distressed_Then_Improved_2010_2019' column. These 4 census tracts are missing at least 1 data point that was used to determine distressed status. 
 
-```{r distressed_chgs_table, message=F, warning=F}
-# create table of number of worsened and improved tracts by county, then display
-distressed_chgs <- distressed.tab %>% 
-  group_by(county) %>% 
-  summarize(
-    across(
-      grep('2010_2019', colnames(.), value = TRUE), 
-      \(x) sum(x, na.rm = TRUE)
-    ),
-    tot_tracts = n()
-  ) %>% 
-  st_drop_geometry() %>% 
-  arrange(desc(if_Became_Distressed_2010_2019))
-
-distressed_chgs %>%
-  gt() %>%
-  cols_label(
-    county = md('**County**'),
-    if_Became_Distressed_2010_2019 = md('**Became Distressed**'),
-    if_Distressed_Then_Improved_2010_2019 = md('**Distressed Then Improved**'),
-    tot_tracts = md('**# Tracts**')
-  )
+```{r NA_improved_tracts, message=F, warning=F}
+# display median income and pct below poverty data data for tracts
+# that have NA 'if_Distressed_Then_Improved_2010_2019' value
+st_tracts.distressed %>%
+  filter(is.na(if_Distressed_Then_Improved_2010_2019)) %>%
+  select(NAME, median_incomeE_2010, median_incomeE_2019, 
+         pct_below_poverty_2010, pct_below_poverty_2019) %>%
+  st_drop_geometry() %>%
+  gt()
 ```
 
-## County-Level Distressed and Land Cover Change Analysis
+Most of the census tracts that became distressed between 2010 and 2019 are located in built-up areas, such as Binghamton, Jamestown, Dunkirk, Cortland, and Hornell. There were additionally a few rural tracts that became distressed, as well as the Allegany Indian Reservation centered around Salamanca in Cattaraugus County.
 
-Add some text here
+There were only 2 census tracts that improved from a distressed status: 1 in Broome County in between Binghamton and Johnson City (Census Tract 1) and 1 in eastern Dunkirk (Census Tract 354). In Census Tract 1, the median family income increased by over 64% and the percentage below poverty level increased by less than 4%. In Census Tract 354, the median family income increased by almost 46% and the percentage below poverty level decreased by over 20%.
+
+## Distressed Population and Land Cover Change Analysis
 
 ### Analysis Set Up
 
-Add some text here
+Some percentage change values were calculated to be infinite values, which occurred when the value of some variable was 0 in 2010 and had increased by 2019. These values were edited to reflect a change of (an arbitrary value of) 1,000,000% so that they could be used in the correlation analysis.
 
-```{r calculate_county_level_data_function, message=F, warning=F}
-# define calculate_county_level_data function - 
-calculate_county_level_data <- function(lc_file, year) {
-  # initialize index to use in county_data_list
-  index = 1
-  
-  # initialize list to hold dataframe for each county
-  county_data_list = vector('list', length = length(southern_tier_counties))
-  
+```{r gather_data_function, message=F, warning=F}
+# define add_land_cover_type_area function
+add_land_cover_type_area <- function(summarize_df, df, col, lc_num) {
+  summarize_df[1,as.character(col)] = ifelse(
+    nrow(filter(df, land_cover_category == lc_num)) == 1,
+    filter(df, land_cover_category == lc_num)$area_sqmi,
+    0
+  )
+}
+
+# define gather_data function
+gather_data <- function(lc_file, year, geog) {
   # set column names for different land cover categories
   developed_col = as.symbol(paste('developed_area_sqmi_', as.character(year), sep = ''))
   natural_barren_col = as.symbol(paste('natural_barren_area_sqmi_', as.character(year), sep = ''))
@@ -754,10 +832,15 @@ calculate_county_level_data <- function(lc_file, year) {
   # set name of tot_pop_distressed column with year appended to end
   tot_pop_distressed_col <- as.symbol(paste('tot_pop_distressed_', as.character(year), sep = ''))
   
+  # set columns only used in tracts data gathering
+  tot_below_poverty_est_col = as.symbol(paste('tot_below_povertyE_', as.character(year), sep=''))
+  hhs_no_vehicles_est_col = as.symbol(paste('hhs_no_vehicleE_', as.character(year), sep = ''))
+  
   # set total population column to use in calculations
   tot_pop_est_col = as.symbol(paste('tot_popE_', as.character(year), sep = ''))
   tot_pop_col = as.symbol(paste('tot_pop_', as.character(year), sep = ''))
   tot_hhs_col = as.symbol(paste('tot_hhs_', as.character(year), sep = ''))
+  tot_hhs_est_col = as.symbol(paste('tot_hhsE_', as.character(year), sep = ''))
   tot_below_poverty_col = as.symbol(paste('tot_below_poverty_', as.character(year), sep = ''))
   pop_civ_lab_force_col = as.symbol(paste('pop_gt_16_in_civ_lab_force_', as.character(year), sep = ''))
   pop_unemployed_col = as.symbol(paste('pop_gt_16_in_civ_lab_force_unemployed_', as.character(year), sep = ''))
@@ -786,124 +869,312 @@ calculate_county_level_data <- function(lc_file, year) {
   median_age_moe_col = as.symbol(paste('median_ageM_', as.character(year), sep = ''))
   median_income_moe_col = as.symbol(paste('median_incomeM_', as.character(year), sep = ''))
   
-  # iterate over each study county and get population, distressed, and zonal stats data,
-  # then store resulting data frame in df object
-  df <- for (i in southern_tier_counties) {
-    print(i)
-    
-    # get county geography
-    county_sf <- study_counties %>% filter(NAME == i)
-    
-    # get cropped & masked land cover raster for county
-    county_lc_masked <- crop_raster(lc_file, county_sf)
-    
-    # calculate area of each land cover category in county
-    county_zonal_stats <- calculate_zonal_stats(county_lc_masked) %>%
-      summarize(
-        !!developed_col := filter(., land_cover_category == 1)$area_sqmi,
-        !!natural_barren_col := filter(., land_cover_category == 8)$area_sqmi,
-        !!cropland_col := filter(., land_cover_category == 2)$area_sqmi,
-        !!tree_cover_col := filter(., land_cover_category == 4)$area_sqmi,
-        !!grassland_col := filter(., land_cover_category == 3)$area_sqmi,
-        !!wetland_col := filter(., land_cover_category == 6)$area_sqmi,
-        !!water_col := filter(., land_cover_category == 5)$area_sqmi
-      ) %>%
-      mutate(county = i,
-             geometry = county_sf$geometry) %>%
-      st_as_sf(crs = st_crs(st_counties.2010_2019))
-    
-    # get county stats
-    county_pop_data <- 
-      filter(st_counties.2010_2019, county == i) %>%
-      select(county, contains(as.character(year)) & !contains('pct'))
-    
-    # calculate number of people in each county that lived in tracts that
-    # were distressed and improved and in tracts that became distressed
-    county_distressed <-
-      st_tracts.distressed %>%
-      filter(county == i) %>%
-      select(GEOID, NAME, county, contains('Distressed'), contains('tot_popE'))
-    
-    # total number of people living in distress for this year
-    pop_distressed <- 
-      county_distressed %>%
-      filter(!!distressed_col_yr == TRUE) %>%
-      summarize(
-        !!tot_pop_distressed_col := sum(!!tot_pop_est_col, na.rm = TRUE)
-      ) %>%
-      mutate(county = i) %>%
-      relocate(geometry, .after = last_col())
-    
-    # get number of people who lived in areas that became distressed by 2019
-    pop_became_distressed <-
-      county_distressed %>%
-      filter(if_Became_Distressed_2010_2019 == TRUE) %>%
-      summarize(
-        tot_pop_became_distressed_2010_2019 = sum(!!tot_pop_est_col, na.rm = TRUE)
-      ) %>%
-      mutate(county = i) %>%
-      relocate(geometry, .after = last_col())
-    
-    # get number of people who lived in areas that improved by 2019
-    pop_improved <- 
-      county_distressed %>%
-      filter(if_Distressed_Then_Improved_2010_2019 == TRUE) %>%
-      summarize(
-        tot_pop_improved_2010_2019 = sum(!!tot_pop_est_col, na.rm = TRUE)
-      ) %>%
-      mutate(county = i) %>%
-      relocate(geometry, .after = last_col())
-    
-    # join distressed data-related data frames together
-    county_distressed.data <-
-      st_join(pop_distressed, pop_became_distressed) %>%
-      st_join(pop_improved)
-    
-    # join 3 dataframes, then add to list of county data frames
-    d <- st_join(county_pop_data, county_distressed.data, suffix = c('', '.y')) %>%
-      st_join(county_zonal_stats, suffix = c('', '.z')) %>%
-      select(-c('county.y...17', 'county.y...19', 'county.x', 'county.z', !!median_age_moe_col, !!median_income_moe_col)) %>%
-      rename(
-        !!new_median_age_est_col := !!median_age_est_col,
-        !!new_median_income_est_col := !!median_income_est_col
-      ) %>%
-      mutate(
-        !!pct_below_poverty_col := (!!tot_below_poverty_col / !!tot_pop_col) * 100,
-        !!pct_unemployed_col := (!!pop_unemployed_col / !!pop_civ_lab_force_col) * 100,
-        !!pct_pop_distressed_col := (!!pop_distressed_col / !!tot_pop_col) * 100,
-        !!pct_hhs_no_vehicles_col := (!!hhs_no_vehicles_col / !!tot_hhs_col) * 100,
-        !!pct_developed_col := (!!developed_col / !!area_col) * 100,
-        !!pct_natural_barren_col := (!!natural_barren_col / !!area_col) * 100,
-        !!pct_cropland_col := (!!cropland_col / !!area_col) * 100,
-        !!pct_tree_cover_col := (!!tree_cover_col / !!area_col) * 100,
-        !!pct_grassland_col := (!!grassland_col / !!area_col) * 100,
-        !!pct_wetland_col := (!!wetland_col / !!area_col) * 100,
-        !!pct_water_col := (!!water_col / !!area_col) * 100
-      )
-    
-    # add data frame to county data list
-    county_data_list[[index]] <- d
-    
-    # add 1 to index
-    index = index + 1
+  # initialize index to use in data_list
+  index = 1
+  
+  # # initialize list to hold dataframe for each county or tract
+  if (geog == 'county') {
+    data_list = vector('list', length = length(southern_tier_counties))
+  } else {
+    data_list = vector('list', length = length(st_tracts.2010_2019))
   }
   
-  # bind county data frames together, then return list
-  data <- bind_rows(county_data_list)
+  # run this if geog is set to 'county'
+  if (geog == 'county') {
+    # iterate over each study county and get population, distressed, and zonal stats data,
+    # then store resulting data frame in df object
+    df <- for (i in southern_tier_counties) {
+      # get county geography
+      county_sf <- study_counties %>% filter(NAME == i)
+      
+      # get cropped & masked land cover raster for county
+      county_lc_masked <- crop_raster(lc_file, county_sf)
+      
+      # calculate area of each land cover category in county
+      county_zonal_stats <- calculate_zonal_stats(county_lc_masked) %>%
+        summarize(
+          !!developed_col := filter(., land_cover_category == 1)$area_sqmi,
+          !!natural_barren_col := filter(., land_cover_category == 8)$area_sqmi,
+          !!cropland_col := filter(., land_cover_category == 2)$area_sqmi,
+          !!tree_cover_col := filter(., land_cover_category == 4)$area_sqmi,
+          !!grassland_col := filter(., land_cover_category == 3)$area_sqmi,
+          !!wetland_col := filter(., land_cover_category == 6)$area_sqmi,
+          !!water_col := filter(., land_cover_category == 5)$area_sqmi
+        ) %>%
+        mutate(county = i,
+               geometry = county_sf$geometry) %>%
+        st_as_sf(crs = st_crs(st_counties.2010_2019))
+      
+      # get county stats
+      county_pop_data <- 
+        st_counties.2010_2019 %>%
+        filter(county == i) %>%
+        select(county, contains(as.character(year)) & !contains('pct'))
+      
+      # calculate number of people in each county that lived in tracts that
+      # were distressed and improved and in tracts that became distressed
+      county_distressed <-
+        st_tracts.distressed %>%
+        filter(county == i) %>%
+        select(GEOID, NAME, county, contains('tot_popE'), contains('Distressed'))
+      
+      # total number of people living in distress for this year
+      pop_distressed <- 
+        county_distressed %>%
+        filter(!!distressed_col_yr == TRUE) %>%
+        summarize(
+          !!tot_pop_distressed_col := sum(!!tot_pop_est_col, na.rm = TRUE)
+        ) %>%
+        mutate(county = i) %>%
+        relocate(geometry, .after = last_col())
+      
+      # get number of people who lived in areas that became distressed by 2019
+      pop_became_distressed <-
+        county_distressed %>%
+        filter(if_Became_Distressed_2010_2019 == TRUE) %>%
+        summarize(
+          tot_pop_became_distressed_2010_2019 = sum(!!tot_pop_est_col, na.rm = TRUE)
+        ) %>%
+        mutate(county = i) %>%
+        relocate(geometry, .after = last_col())
+      
+      # get number of people who lived in areas that improved by 2019
+      pop_improved <- 
+        county_distressed %>%
+        filter(if_Distressed_Then_Improved_2010_2019 == TRUE) %>%
+        summarize(
+          tot_pop_improved_2010_2019 = sum(!!tot_pop_est_col, na.rm = TRUE)
+        ) %>%
+        mutate(county = i) %>%
+        relocate(geometry, .after = last_col())
+      
+      # join distressed data-related data frames together
+      county_distressed.data <-
+        st_join(pop_distressed, pop_became_distressed) %>%
+        st_join(pop_improved)
+      
+      # join 3 dataframes, then add to list of county data frames
+      d <- st_join(county_pop_data, county_distressed.data, suffix = c('', '.y')) %>%
+        st_join(county_zonal_stats, suffix = c('', '.z')) %>%
+        select(-c('county.y...17', 'county.y...19', 'county.x', 'county.z', !!median_age_moe_col, !!median_income_moe_col)) %>%
+        rename(
+          !!new_median_age_est_col := !!median_age_est_col,
+          !!new_median_income_est_col := !!median_income_est_col
+        ) %>%
+        mutate(
+          !!pct_below_poverty_col := (!!tot_below_poverty_col / !!tot_pop_col) * 100,
+          !!pct_unemployed_col := (!!pop_unemployed_col / !!pop_civ_lab_force_col) * 100,
+          !!pct_pop_distressed_col := (!!pop_distressed_col / !!tot_pop_col) * 100,
+          !!pct_hhs_no_vehicles_col := (!!hhs_no_vehicles_col / !!tot_hhs_col) * 100,
+          !!pct_developed_col := (!!developed_col / !!area_col) * 100,
+          !!pct_natural_barren_col := (!!natural_barren_col / !!area_col) * 100,
+          !!pct_cropland_col := (!!cropland_col / !!area_col) * 100,
+          !!pct_tree_cover_col := (!!tree_cover_col / !!area_col) * 100,
+          !!pct_grassland_col := (!!grassland_col / !!area_col) * 100,
+          !!pct_wetland_col := (!!wetland_col / !!area_col) * 100,
+          !!pct_water_col := (!!water_col / !!area_col) * 100
+        )
+    
+      # add data frame to county data list
+      data_list[[index]] <- d
+    
+      # add 1 to index
+      index = index + 1
+    }
+  } else { # run this if geography is set to 'tract'
+      # iterate over each study tract and get population, distressed, and zonal stats data,
+      # then store resulting data frame in df object
+      df <- for (i in st_tracts.2010_2019$GEOID) {
+        # get tract geography
+        tract_sf <- st_tracts.2010_2019 %>% filter(GEOID == i)
+        
+        # get cropped & masked land cover raster for tract
+        tract_lc_masked <- crop_raster(lc_file, tract_sf)
+        
+        # calculate area of each land cover category in tract
+        tract_zonal_stats <- calculate_zonal_stats(tract_lc_masked)
+        
+        # create vector of column names in summarized area table
+        col.names <- c(developed_col, natural_barren_col, cropland_col,
+                       tree_cover_col, grassland_col, wetland_col, water_col)
+        
+        # create new single-row data frame with column names called tr.zs
+        # to store area stats for census tract
+        tr.zs <- as.data.frame(matrix(rep(0, length(col.names)), nrow=1))
+        names(tr.zs) <- col.names
+        
+        # add area for each land cover type to new df
+        tr.zs[1, as.character(developed_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          developed_col, 1)
+        tr.zs[1, as.character(cropland_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          cropland_col, 2)
+        tr.zs[1, as.character(grassland_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          developed_col, 3)
+        tr.zs[1, as.character(tree_cover_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          tree_cover_col, 4)
+        tr.zs[1, as.character(water_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          water_col, 5)
+        tr.zs[1, as.character(wetland_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          wetland_col, 6)
+        tr.zs[1, as.character(natural_barren_col)] <- add_land_cover_type_area(tr.zs, 
+                                                                          tract_zonal_stats,
+                                                                          natural_barren_col, 8)
+        
+        # add GEOID, total area, and geometry columns to tr.zs then turn into sf
+        tr.zs <-
+          tr.zs %>%
+          mutate(tract = i,
+                 !!area_col := !!developed_col + !!natural_barren_col + !!cropland_col + !!tree_cover_col + !!grassland_col + !!wetland_col + !!water_col,
+                 geometry = tract_sf$geometry) %>%
+          st_as_sf(crs = st_crs(st_tracts.2010_2019))
+        
+        # get tracts stats
+        tract_pop_data <- 
+          filter(st_tracts.2010_2019, GEOID == i) %>%
+          select(GEOID, NAME, county, contains(as.character(year))) %>%
+          rename(
+            !!pop_civ_lab_force_col := as.symbol(paste('pop_gt_16_in_civilian_labor_force_', as.character(year), sep = '')),
+            !!pop_unemployed_col := as.symbol(paste('pop_gt_16_in_civilian_labor_force_unemployed_', as.character(year), sep = ''))
+          )
+        
+        # get distressed data for tract
+        tract_distressed <-
+          st_tracts.distressed %>%
+          filter(GEOID == i) %>%
+          select(GEOID, contains('tot_popE'), contains('Distressed')) %>%
+          select(-grep('M_', colnames(.), value = TRUE))
+        
+        # total number of people living in distress for this year
+        pop_distressed <- 
+          tract_distressed %>%
+          filter(!!distressed_col_yr == TRUE) %>%
+          summarize(
+            !!tot_pop_distressed_col := sum(!!tot_pop_est_col, na.rm = TRUE)
+          ) %>%
+          mutate(GEOID = i) %>%
+          relocate(geometry, .after = last_col())
+        
+        # join 3 dataframes, then add to list of county data frames
+        d <- st_join(tract_pop_data, pop_distressed, suffix = c('', '.y')) %>%
+          st_join(tr.zs, suffix = c('', '.z')) %>%
+          select(-c(GEOID.y, tract, !!median_age_moe_col, !!median_income_moe_col)) %>%
+          rename(
+            !!new_median_age_est_col := !!median_age_est_col,
+            !!new_median_income_est_col := !!median_income_est_col
+          ) %>%
+          mutate(
+            !!pct_below_poverty_col := (!!tot_below_poverty_est_col / !!tot_pop_est_col) * 100,
+            !!pct_unemployed_col := (!!pop_unemployed_col / !!pop_civ_lab_force_col) * 100,
+            !!pct_pop_distressed_col := (!!pop_distressed_col / !!tot_pop_est_col) * 100,
+            !!pct_hhs_no_vehicles_col := (!!hhs_no_vehicles_est_col / !!tot_hhs_est_col) * 100,
+            !!pct_developed_col := (!!developed_col / !!area_col) * 100,
+            !!pct_natural_barren_col := (!!natural_barren_col / !!area_col) * 100,
+            !!pct_cropland_col := (!!cropland_col / !!area_col) * 100,
+            !!pct_tree_cover_col := (!!tree_cover_col / !!area_col) * 100,
+            !!pct_grassland_col := (!!grassland_col / !!area_col) * 100,
+            !!pct_wetland_col := (!!wetland_col / !!area_col) * 100,
+            !!pct_water_col := (!!water_col / !!area_col) * 100
+          )
+        
+        # add data frame to county data list
+        data_list[[index]] <- d
+      
+        # add 1 to index
+        index = index + 1
+      }
+  }
+  
+  # bind geography data frames together then return data
+  data <- bind_rows(data_list)
   
   return(data)
 }
 ```
 
-### Analysis Processing
+### Tract-Level Distressed Population and Land Cover Change Data
 
-Add some text here
-
-```{r combine_land_cover_chg_distressed, message=F, warning=F}
+```{r combine_tract_land_cover_chg_distressed, warning=F, message=F}
 # get full counties sfs for 2010 and 2019 and fill NA with 0, then join them into a single sf
-final_counties_df.2010 <- calculate_county_level_data(st_lc_2010_masked, 2010)
+final_tracts_df.2010 <- gather_data(st_lc_2010_masked, 2010, 'tract')
+final_tracts_df.2010[is.na(final_tracts_df.2010)] <- 0
+final_tracts_df.2019 <- gather_data(st_lc_2019_masked, 2019, 'tract')
+final_tracts_df.2019[is.na(final_tracts_df.2019)] <- 0
+
+final_tracts_df <- 
+  st_join(final_tracts_df.2010, final_tracts_df.2019, 
+                             suffix = c('', '.y'), largest = TRUE) %>% 
+  select(-contains('.y'), -contains('M_'), -contains('chg')) %>%
+  rename_with(~ str_replace(., 'E_', '_'), 
+              grep('E_', colnames(.), value = TRUE)) %>%
+  mutate(
+    pct_pop_chg = ((tot_pop_2019 - tot_pop_2010) / tot_pop_2010) * 100,
+    pct_hhs_chg = ((tot_hhs_2019 - tot_hhs_2010) / tot_hhs_2010) * 100,
+    pct_median_age_chg = ((median_age_2019 - median_age_2010) / median_age_2010) * 100,
+    pct_median_income_chg = ((median_income_2019 - median_income_2010) / median_income_2010) * 100,
+    pct_below_poverty_chg = ((pct_below_poverty_2019 - pct_below_poverty_2010) / pct_below_poverty_2010) * 100,
+    pct_unemployed_chg = ((pct_unemployed_2019 - pct_unemployed_2010) / pct_unemployed_2010)  * 100,
+    pct_pop_distressed_chg = ((pct_pop_distressed_2019 - pct_pop_distressed_2010) / pct_pop_distressed_2010) * 100,
+    pct_hhs_no_vehicles_chg = ((pct_hhs_no_vehicles_2019 - pct_hhs_no_vehicles_2010) / pct_hhs_no_vehicles_2010) * 100,
+    pct_developed_chg = ((pct_developed_area_sqmi_2019 - pct_developed_area_sqmi_2010) / pct_developed_area_sqmi_2010) * 100,
+    pct_natural_barren_chg = ((pct_natural_barren_area_sqmi_2019 - pct_natural_barren_area_sqmi_2010) / pct_natural_barren_area_sqmi_2010) * 100,
+    pct_cropland_chg = ((pct_cropland_area_sqmi_2019 - pct_cropland_area_sqmi_2010) / pct_cropland_area_sqmi_2010) * 100,
+    pct_tree_cover_chg = ((pct_tree_cover_area_sqmi_2019 - pct_tree_cover_area_sqmi_2010) / pct_tree_cover_area_sqmi_2010) * 100,
+    pct_grassland_chg = ((pct_grassland_area_sqmi_2019 - pct_grassland_area_sqmi_2010) / pct_grassland_area_sqmi_2010) * 100,
+    pct_wetland_chg = ((pct_wetland_area_sqmi_2019 - pct_wetland_area_sqmi_2010) / pct_wetland_area_sqmi_2010) * 100,
+    pct_water_chg = ((pct_water_area_sqmi_2019 - pct_water_area_sqmi_2010) / pct_water_area_sqmi_2010) * 100
+  ) %>%
+  mutate_if(is.numeric, ~ replace_na(., 0) %>% replace(., is.infinite(.), 1000000)) %>%
+  relocate(geometry, .after = last_col())
+
+final_tracts_df[is.na(final_tracts_df)] <- 0
+
+# display county-level table of data
+final_tracts_df %>%
+  select(NAME, county, grep('chg', colnames(.), value = TRUE)) %>%
+  mutate(NAME = str_split(.$NAME, ',', simplify = TRUE)) %>%
+  st_drop_geometry() %>%
+  gt(groupname_col = 'county') %>%
+  tab_options(row_group.as_column = TRUE, 
+              container.height = 1500,
+              container.overflow.y = TRUE) %>%
+  tab_stubhead(label = 'county') %>%
+  tab_header(
+    title = md('**Changes in Population Characteristics, Economic Indicators, and Land Cover**'),
+    subtitle = md('By Southern Tier Census Tract (2010 - 2019)')
+  ) %>%
+  cols_label(
+    pct_pop_chg = md('**% Pop Change**'),
+    pct_hhs_chg = md('**% HHs Change**'),
+    pct_median_age_chg = md('**% Median Age Change**'),
+    pct_median_income_chg = md('**% Median Income Change**'),
+    pct_below_poverty_chg = md('**% Pop Below Poverty Change**'),
+    pct_unemployed_chg = md('**% Unemployment Rate Change**'),
+    pct_pop_distressed_chg = md('**% Pop Distressed Change**'),
+    pct_hhs_no_vehicles_chg = md('**% HHs No Vehicle Change**'),
+    pct_developed_chg = md('**% Developed Change**'),
+    pct_natural_barren_chg = md('**% Natural Barren Change**'),
+    pct_cropland_chg = md('**% Cropland Change**'),
+    pct_tree_cover_chg = md('**% Tree Cover Change**'),
+    pct_grassland_chg = md('**% Grassland Change**'),
+    pct_wetland_chg = md('**% Wetland Change**'),
+    pct_water_chg = md('**% Water Change**')
+  ) %>%
+  fmt_percent(decimals = 1, scale_values = FALSE)
+```
+
+### County-Level Distressed Population and Land Cover Change Data
+
+```{r combine_county_land_cover_chg_distressed, warning=F, message=F}
+# get full counties sfs for 2010 and 2019 and fill NA with 0, then join them into a single sf
+final_counties_df.2010 <- gather_data(st_lc_2010_masked, 2010, 'county')
 final_counties_df.2010[is.na(final_counties_df.2010)] <- 0
-final_counties_df.2019 <- calculate_county_level_data(st_lc_2019_masked, 2019)
+final_counties_df.2019 <- gather_data(st_lc_2019_masked, 2019, 'county')
 final_counties_df.2019[is.na(final_counties_df.2019)] <- 0
 
 final_counties_df <- 
@@ -964,32 +1235,34 @@ final_counties_df %>%
   fmt_percent(decimals = 1, scale_values = FALSE)
 ```
 
+All counties except for Tompkins County had a population decline and an increase in the proportion of distressed people. Tompkins County was the only county where the civilian unemployment rate increased. All counties got older with the exception of Broome County. Additionally, median family income increased by at least 14% in all counties.
+
+There were marginal changes in developed land, cropland, tree cover, wetland, and water areas in all counties. There were more significant changes in natural barren and (to a lesser extent) grassland areas in all counties. Grassland decreased by over 10% in Schuyler County (-12.8%) and Otsego County (-10.4%). All counties had much more natural barren land by 2019. However, the actual amount of land that became barren is relatively small given the very small amount of total natural barren land in the study area.
+
 ### Analysis Correlations
 
-Add code and some text here
+This correlation analysis used the Pearson method.
 
-```{r correlations_main, message=F, warning=F}
+```{r tract_correlations_main, warning=F, message=F}
 # filter for only pct chg columns
-counties.pct_chg <- final_counties_df %>% 
-  select(county, grep('chg', colnames(.), value = TRUE)) %>%
+tracts.pct_chg <- final_tracts_df %>% 
+  select(NAME, grep('chg', colnames(.), value = TRUE)) %>%
   st_drop_geometry()
 
 # calculate correlation coefficients between all variables
-correlations <- cor(select(counties.pct_chg, -c(county)))
+tract_correlations <- cor(select(tracts.pct_chg, -c(NAME)))
 
 # display heatmap of correlations
 heatmaply(
-  correlations, colors = colorRampPalette(c('blue', 'white', 'orange'))(100), 
+  tract_correlations, colors = colorRampPalette(c('blue', 'white', 'orange'))(100), 
   dendrogram = 'none', limits = c(-1, 1), branches.lwd = 0.5
 )
 ```
 
-Add some text here
-
-```{r correlations_distressed, message=F, warning=F}
+```{r tract_correlations_distressed, warning=F, message=F}
 # create data frame of correlation coefficients between 
 # pct distressed pop chg and other variables
-cor.df <- melt(correlations) %>% 
+tract_cor.df <- melt(tract_correlations) %>% 
   filter(Var1 == 'pct_pop_distressed_chg', Var2 != 'pct_pop_distressed_chg') %>%
   select(-Var1) %>%
   rename(
@@ -999,9 +1272,9 @@ cor.df <- melt(correlations) %>%
   arrange(desc(Coefficient))
 
 # display table of correlation with pct distressed pop chg in descending order of correlation
-cor.df %>%
+tract_cor.df %>%
   gt() %>%
-  tab_header(title = md('**Correlation with Percent Distressed Population Change**')) %>%
+  tab_header(title = md('**Tract-Level Correlation with Percent Distressed Population Change**')) %>%
   cols_align(align = 'center') %>%
   cols_label(
     Variable = md('**Variable**'),
@@ -1010,37 +1283,61 @@ cor.df %>%
   fmt_number(columns = Coefficient, decimals = 3)
 ```
 
-Add some text here
+The most significant correlation is between population change and household change, which has a direct relationship. Other strong correlations are between poverty rate change and water area change which have a strong positive correlation, as well as the change in percentage of households with no vehicle and wetland area change which have a strong negative correlation.
+
+The change in distressed population variable is not strongly correlated with any of the other percentage change variables, with cropland area change being the strongest relationship. Even then, the relationship is mild at best.
 
 # Conclusions
 
-\[\~200 words\]
+This study was severely limited in the variables that were analyzed, since the study was centered around an analysis of the distressed population based on the two-variable criteria outlined by the Appalachian Regional Commission. A much deeper statistical analysis of the Southern Tier could be conducted to evaluate additional trends and gain better insights into the area, like the study by Ludke et al. (2012) which considered many other demographic variables such as employment by worker class and occupation, educational attainment, dependency ratio, marital status, and more granular poverty level variables (e.g., individual poverty, childhood poverty, senior adult poverty, and female household poverty). This study was also limited in its methodology related to the land cover change analysis. Methods employed by KC et al. (2024) in their analysis of eastern Kentucky would allow for better identification of land cover changes and how it changed, including the use of a random tree classifier, hot spot analysis, and the creation of a map of the areas that changed and what the land became.
 
-Clear summary adequately describing the results and putting them in context. Discussion of further questions and ways to continue investigation.
+The ACS 5-year data sets are generally viewed as the most accurate given the larger sample sizes. There could still be questions regarding the accuracy of certain estimates in many of the census tracts included in this study, especially in rural census tracts with smaller populations and larger margins of error. Despite this possible limitation, this study is still able to provide some valuable insights into how the New York Southern Tier region has changed between 2010 and 2019. Land cover did not change too drastically, with the largest changes being the additional 3.4 square miles of natural barren land and the 2.9 square miles of land that are no longer grasslands in the entire 14-county study area. There were no significant relationships between the change in distressed population proportion and changes in land cover and other population variables, suggesting that one could not accurately predict how a census tract's population and land cover change based on the change in its proportion of people living in distressed areas. While median family income increased in all counties, every county except Tompkins County became older, less populated, and more distressed. Built-up areas in the Southern Tier (especially Binghamton, Jamestown, Dunkirk, Elmira, and Salamanca) are considerably more distressed than rural areas, with Ithaca and Oneonta being the only cities that do not have a significant risk.
+
+On top of what has already been mentioned regarding other methods that could be used, a study that also evaluates the 14-county study area in the post-COVID era (2020 - present) could offer valuable information about how the demographics of the Southern Tier have changed further since the onset of the pandemic, and if COVID has increased the number of distressed people.
 
 # References
 
-McMahon, E.J. https://www.empirecenter.org/publications/eight-in-10-new-york-towns-and-cities-have-lost-population-since-2020/
+## Works Cited
 
-https://www.arc.gov/about-the-appalachian-region/county-economic-status-and-distressed-areas-by-state-fy-2024/
+Appalachian Regional Commission. (2023). County Economic Status and Distressed Areas by State, FY 2024. <https://www.arc.gov/about-the-appalachian-region/county-economic-status-and-distressed-areas-by-state-fy-2024>
 
-K C, S., Gyawali, B. R., Lucas, S., Antonious, G. F., Chiluwal, A., & Zourarakis, D. (2024). Assessing Land-Cover Change Trends, Patterns, and Transitions in Coalfield Counties of Eastern Kentucky, USA. Land, 13(9), 1541. https://doi.org/10.3390/land13091541 
+Galili, T., O'Callaghan, A., Sidi, J., & Sievert, C. (2017). heatmaply: an R package for creating interactive cluster heatmaps for online publishing. Bioinformatics, 34(9), 1600-1602. <https://doi.org/10.1093/bioinformatics/btx657>
 
-Distressed area methodology:
-https://www.arc.gov/distressed-areas-classification-system/
+Hijmans, R. (2024). terra: Spatial Data Analysis. R package version 1.8-6. <https://github.com/rspatial/terra>
 
-#################
+K C, S., Gyawali, B. R., Lucas, S., Antonious, G. F., Chiluwal, A., & Zourarakis, D. (2024). Assessing Land-Cover Change Trends, Patterns, and Transitions in Coalfield Counties of Eastern Kentucky, USA. Land, 13(9), 1541. <https://doi.org/10.3390/land13091541>
 
-https://www.jstor.org/stable/23337708
+Ludke, R. L., Obermiller, P. J., & Rademacher, E. W. (2012). Demographic Change in Appalachia: A Tentative Analysis. Journal of Appalachian Studies, 18(1/2), 48–92. <http://www.jstor.org/stable/23337708>
 
-https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-2346%20Land%20Change%20Monitoring%2C%20Assessment%2C%20and%20Projection%20%28LCMAP%29%20Collection%201.3%20Data%20Format%20Control%20Book%20%28DFCB%29%20-v1.0%20%202022_07_12.pdf
+McMahon, E.J. (2024). Eight in 10 New York towns and cities have lost population since 2020. *Empire Center*. <https://www.empirecenter.org/publications/eight-in-10-new-york-towns-and-cities-have-lost-population-since-2020>
 
-ACS data = ACS 5-year
+Walker, K. & Herman, M. (2024). tidycensus: Load US Census Boundary and Attribute Data as 'tidyverse' and 'sf'-Ready Data Frames. R package version 1.6.6. <https://walker-data.com/tidycensus>
 
-Primary Land Cover data: https://www.usgs.gov/special-topics/lcmap/collection-13-conus-science-products
 
-2010 US data:
-Total HHs: https://www2.census.gov/library/publications/cen2010/briefs/c2010br-14.pdf (p. 5)
-Median Age: https://www.census.gov/newsroom/releases/archives/2010_census/cb11-cn144.html
-Median Family Income: https://www.huduser.gov/portal/datasets/il/il10/Medians2010.pdf
-Poverty Rate: https://www2.census.gov/library/publications/2012/acs/acsbr11-01.pdf
+## Data Sources and Methodology
+
+[2010 U.S. Data]{.underline}
+
+* Total Population: U.S. Census Bureau. (2010). 2010 Summary File 1 Tables [All 50 States & DC]. <https://api.census.gov/data/2010/dec/sf1?>
+* Total Households: Lofquist, D., Lugaila, T., O'Connell, M., & Felix, S. (April 2012). "Households and Families: 2010," 2010 Census Briefs, C2010BR-14. U.S. Census Bureau, Washington, DC. <https://www2.census.gov/library/publications/cen2010/briefs/c2010br-14.pdf>, pg. 5.
+* Median Age: U.S. Census Bureau. (26 May 2011). "Census Bureau Releases 2010 Census Demographic Profiles for the United States, Arkansas, Illinois, Indiana, Iowa, Louisiana, Maryland, New Jersey, Oklahoma, Oregon, South Dakota, Texas, Vermont and Virginia," CB11-CN.144. <https://www.census.gov/newsroom/releases/archives/2010_census/cb11-cn144.html>
+* Median Family Income: U.S. Department of Housing and Urban Development. (14 May 2010). "Estimated Median Family Incomes for Fiscal Year 2010," PDR-2010-01. <https://www.huduser.gov/portal/datasets/il/il10/Medians2010.pdf>
+* Poverty Rate: Bishaw, A. (September 2012). "Poverty: 2010 and 2011," American Community Survey Briefs, ACSBR/11-01. U.S. Census Bureau, Washington, DC. <https://www2.census.gov/library/publications/2012/acs/acsbr11-01.pdf>, pg. 3.
+
+[American Community Survey (ACS) Data]{.underline}
+
+* U.S. Census Bureau. (2010). American Community Survey 5-Year Estimates: Comparison Profiles 5-Year. <http://api.census.gov/data/2010/acs/acs5>
+* U.S. Census Bureau. (2019). American Community Survey 5-Year Estimates: Comparison Profiles 5-Year. <http://api.census.gov/data/2019/acs/acs5>
+* U.S. Census Bureau. (2010). "Selected Economic Characteristics." American Community Survey 5-Year Estimates Subject Tables, Table DP03. <https://data.census.gov/table/ACSDP5YSPT2010.DP03>
+* U.S. Census Bureau. (2019). "Selected Economic Characteristics." American Community Survey 5-Year Estimates Subject Tables, Table DP03. <https://data.census.gov/table/ACSDP5Y2019.DP03>
+
+[Land Cover Data]{.underline}
+
+Pengra, B.W., Stehman, S.V., Horton, J.A., Auch, R.F., Kambly, S., Knuppe, M., Sorenson, D., Robison, C., and Taylor, J.L. (2023). LCMAP CONUS Reference Data Product 1984-2021 land cover, land use and change process attributes: U.S. Geological Survey data release, <https://doi.org/10.5066/P933Z1TK>
+
+* Primary Land Cover data downloaded from: <https://www.usgs.gov/special-topics/lcmap/collection-13-conus-science-products>
+* Land Cover Classifications from the [LCMAP Collection 1.3 Data Format Control Book](https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-2346%20Land%20Change%20Monitoring%2C%20Assessment%2C%20and%20Projection%20%28LCMAP%29%20Collection%201.3%20Data%20Format%20Control%20Book%20%28DFCB%29%20-v1.0%20%202022_07_12.pdf)
+
+[Distressed Area Classification System]{.underline}
+
+Appalachian Regional Commission. (2024). Distressed Areas Classification System. <https://www.arc.gov/distressed-areas-classification-system/>
