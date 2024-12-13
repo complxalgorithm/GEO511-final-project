@@ -6,6 +6,7 @@ date: today
 date-format: long
 format:
   html:
+    smooth-scroll: true
     toc: true
     toc-location: left
     toc-title: 'Table of Contents'
@@ -13,6 +14,9 @@ format:
     code-tools: true
     embed-resources: true
     self-contained-math: true
+execute:
+  message: false
+  warning: false
 ---
 
 # Introduction
@@ -21,24 +25,26 @@ The Southern Tier of New York consists of fourteen counties that are considered 
 
 ![Map of three subregions in Appalachian NY (NY Department of State)](https://dos.ny.gov/sites/g/files/oee926/files/styles/wysiwyg/public/media/2021/04/arc-map-.png?itok=Jf3ZpQA9){fig-alt="Map of three subregions of the New York Southern Tier region."}
 
-Some areas in Appalachia - namely Eastern Kentucky - have undergone extensive land reclamation efforts in an attempt to repair land that had been damaged during the era of intense coal mining operations, converting much of the reclaimed land into infrastructure, industry, and other development despite consistent population decline (KC, Gyawali, Lucas, et al., 2024). Coal mining was not a large industry in this area at any time, and much of the manufacturing was limited to cities such as Jamestown and Binghamton.
+Some areas in Appalachia - such as Eastern Kentucky - have undergone extensive land reclamation efforts in an attempt to repair land that had been damaged during the era of intense coal mining operations, converting much of the reclaimed land into infrastructure, industry, and other development despite consistent population decline (KC, Gyawali, Lucas, et al., 2024). Coal mining was not a large industry in this area at any time, and much of the manufacturing was limited to cities such as Jamestown and Binghamton.
 
-While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York’s Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are counties and census tracts with a higher change in distressed population more likely to have had an increase in natural barren land and/or a decrease in developed area?
+While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York’s Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are areas with a higher change in distressed population more likely to have had an increase in natural barren land and/or a decrease in developed area?
 
 # Materials and Methods
 
 The analysis looked at various population-related variables. Specifically, data concerning total population, total households, median age, median family income, number of people below the poverty level, unemployment among civilian workforce over the age of 16, and households with no vehicles were pulled and/or aggregated at the U.S., county, and census tract levels. 
 
-Census data was pulled for years between 2010 and 2019. All data was gathered using the [tidycensus](https://walker-data.com/tidycensus/) package, and a majority of it came from American Community Survey (ACS) 5-year estimates. U.S. data for 2010 had to be pulled from the decennial census since ACS data was not available for this year at the country-level. Data for years other than 2010 and 2019 were pulled to allow for additional analysis in the future.
+Census data was pulled for years between 2010 and 2019. All data was gathered using the [tidycensus](https://walker-data.com/tidycensus/) package, and a majority of it came from American Community Survey (ACS) 5-year estimates. U.S. data for 2010 had to be pulled from the decennial census or sourced from governmental reports and news releases since ACS data was not available for this year at the country-level. Data for years other than 2010 and 2019 were pulled to allow for additional analysis in the future.
 
 Primary land cover data for 2010 and 2019 comes from the [USGS](https://www.usgs.gov/special-topics/lcmap/collection-13-conus-science-products) LCMAP project and were downloaded from the [CONUS Mosaic](https://eros.usgs.gov/lcmap/apps/data-downloads) website. This data was processed using the [terra](https://rspatial.github.io/terra/) package.
 
-The methodology used to determine distressed status of each census tract was taken from the Distressed Areas Classification System used by the [Appalachian Regional Commission](https://www.arc.gov/distressed-areas-classification-system/). According to the ARC, the key attributes of a distressed census tract are:
+The methodology used to determine distressed status of each census tract was taken from the [Appalachian Regional Commission](https://www.arc.gov/distressed-areas-classification-system/)'s Distressed Areas Classification System. According to the ARC, the key attributes of a distressed census tract are:
 
 1. A median family income no greater than 67% of the U.S. average.
 2. A poverty rate of 150% of the U.S. average or greater.
 
-The [tidyverse](https://www.tidyverse.org/) collection of packages was primarily used to easily process large amount of data. The [tigris](https://github.com/walkerke/tigris) package was used directly to pull study counties and census tracts to create a map of the study area. The [sf](https://r-spatial.github.io/sf/) package helped with processing spatial features, including data pulled from the ACS. The maps were created using either [leaflet](https://rstudio.github.io/leaflet/), [mapview](https://r-spatial.github.io/mapview/), or [ggplot2](https://ggplot2.tidyverse.org/). The [gt](https://gt.rstudio.com/) package allowed for the creation of better looking tables.
+The correlation analysis was conducted on the census-tract level data and used the [Pearson method](https://www.sciencedirect.com/topics/computer-science/pearson-correlation). The [cor](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/cor) function of the base R [stats](https://rdrr.io/r/stats/stats-package.html) package was used to calculate correlation coefficients.
+
+The [tidyverse](https://www.tidyverse.org/) collection of packages was primarily used to easily process large amount of data. The [tigris](https://github.com/walkerke/tigris) package was used directly to pull study counties and census tracts to create a map of the study area. The [sf](https://r-spatial.github.io/sf/) package helped with processing spatial features, including data pulled from the ACS. The maps were created using either [leaflet](https://rstudio.github.io/leaflet/), [mapview](https://r-spatial.github.io/mapview/), or [ggplot2](https://ggplot2.tidyverse.org/). The [gt](https://gt.rstudio.com/) package allowed for the creation of better looking tables. The [heatmaply](https://github.com/talgalili/heatmaply) package was used to visualize the correlation coefficients between all variables.
 
 ## An Overview of the Analysis Workflow
 
@@ -89,7 +95,7 @@ census_api_key(census_token)
 
 The map below shows the 14 counties in New York's Southern Tier (Allegany, Broome, Cattaraugus, Chautauqua, Chemung, Chenango, Cortland, Delaware, Otsego, Schoharie, Schuyler, Steuben, Tioga, and Tompkins) and all 277 census tracts.
 
-```{r study_area_map, message=F, warning=F, error=F}
+```{r study_area_map, message=F, warning=F}
 # increase timeout time to download files and cache tigris files
 options(timeout = 500, tigris_use_cache = TRUE)
 
