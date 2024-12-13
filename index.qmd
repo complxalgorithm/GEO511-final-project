@@ -6,12 +6,13 @@ date: today
 date-format: long
 format:
   html:
-    smooth-scroll: true
     toc: true
     toc-location: left
     toc-title: 'Table of Contents'
     code-fold: true
     code-tools: true
+    embed-resources: true
+    self-contained-math: true
 ---
 
 # Introduction
