@@ -27,7 +27,7 @@ The Southern Tier of New York consists of fourteen counties that are considered 
 
 Some areas in Appalachia - such as Eastern Kentucky - have undergone extensive land reclamation efforts in an attempt to repair land that had been damaged during the era of intense coal mining operations, converting much of the reclaimed land into infrastructure, industry, and other development despite consistent population decline (KC, Gyawali, Lucas, et al., 2024). Coal mining was not a large industry in this area at any time, and much of the manufacturing was limited to cities such as Jamestown and Binghamton.
 
-While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York’s Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are areas with a higher change in distressed population more likely to have had an increase in natural barren land and/or a decrease in developed area?
+While the need of a study concerning land cover for the purposes of land reclamation may not be necessary for the Southern Tier, an analysis of the region could lead to interesting insights about how the population decline may have impacted land cover changes. The purpose of this analysis is to get a general idea of the changes in population/economic variables and land cover in New York’s Southern Tier between 2010 and 2019 and how they may relate to each other. Specifically, are areas with a higher population decline more likely to have had an increase in natural barren land and/or a decrease in developed area?
 
 # Materials and Methods
 
@@ -60,7 +60,7 @@ Below is an outline of how the analysis was conducted:
 4. Calculate zonal statistics of each of the 8 land cover classifications over the entire study area, then create a table and bar graph showing the changes in each of the classifications between 2010 and 2019.
 5. Determine distressed status of each of the census tracts for each year using criteria from the ARC by comparing median family income and poverty levels to the U.S. values. Determine which census tracts improved (i.e., were distressed in 2010 and no longer distressed in 2019) and which census tracts became distressed. Create maps to show tracts that improved and tracts that became distressed. Also show table breakdown by county of the number of tracts that became distressed and the number of tracts that improved.
 6. Merge base data variables, distressed variable data, and land cover classification data into single datasets at both the census tract and county levels. Calculate percent changes between 2010 and 2019 for each variable in each of the datasets. Create tables for both to show the percent changes by census tract and by county.
-7. Run basic correlation analysis on census tract-level dataset to figure out relationships between variables, and create a heatmap of correlation results. Lastly, create a table of correlation results between the percentage change in distressed population and all other percentage change variables.
+7. Run basic correlation analysis on census tract-level dataset to figure out relationships between variables, and create a heatmap of correlation results. Lastly, create a table of correlation results between the percentage population change and all other percentage change variables.
     + Since there are only 14 counties, a county-level correlation analysis would have a very large margin of error. For this reason, this step was only done on the census tract-level data.
 
 # Data Gathering and Processing
@@ -670,7 +670,7 @@ A majority of the study area is covered by trees and cropland, with much smaller
 
 The final analysis involved calculating the number of people who live in distressed areas. Using the criteria defined in the ARC's Distressed Areas Classification System, the distressed status of each census tract was determined for 2010 and 2019. Using these statuses, it was then possible to see if each census tract improved or became distressed within the same time period. This data was used to figure out how many people lived in distressed areas in each county. The area of each land cover classification was then calculated for each census tract and county.
 
-The above data was combined into separate data frames for census tracts and counties. The percentage change of each study variable was also calculated. Small correlation analyses were conducted to determine relationships between any of the percentage change variables at both the tract and county level and the correlation coefficients were visualized using a heat map. Separate tables were created to see if the percentage change in number of distressed people was related to any of the other percentage change variables.
+The above data was combined into separate data frames for census tracts and counties. The percentage change of each study variable was also calculated, except for the percentage change of distressed population at the census-tract level since these values would either be 0% or infinite. A small correlation analysis was conducted to determine relationships between any of the percentage change variables at both the tract level and the correlation coefficients were visualized using a heat map. A separate table was created to see if the percentage change in population was related to any of the other percentage change variables.
 
 ## Distressed Area Analysis
 
@@ -1054,21 +1054,10 @@ gather_data <- function(lc_file, year, geog) {
         tract_distressed <-
           st_tracts.distressed %>%
           filter(GEOID == i) %>%
-          select(GEOID, contains('tot_popE'), contains('Distressed')) %>%
-          select(-grep('M_', colnames(.), value = TRUE))
-        
-        # total number of people living in distress for this year
-        pop_distressed <- 
-          tract_distressed %>%
-          filter(!!distressed_col_yr == TRUE) %>%
-          summarize(
-            !!tot_pop_distressed_col := sum(!!tot_pop_est_col, na.rm = TRUE)
-          ) %>%
-          mutate(GEOID = i) %>%
-          relocate(geometry, .after = last_col())
+          select(GEOID, contains('Became_Distressed'), contains('Improved'))
         
         # join 3 dataframes, then add to list of county data frames
-        d <- st_join(tract_pop_data, pop_distressed, suffix = c('', '.y')) %>%
+        d <- st_join(tract_pop_data, tract_distressed, suffix = c('', '.y')) %>%
           st_join(tr.zs, suffix = c('', '.z')) %>%
           select(-c(GEOID.y, tract, !!median_age_moe_col, !!median_income_moe_col)) %>%
           rename(
@@ -1078,7 +1067,6 @@ gather_data <- function(lc_file, year, geog) {
           mutate(
             !!pct_below_poverty_col := (!!tot_below_poverty_est_col / !!tot_pop_est_col) * 100,
             !!pct_unemployed_col := (!!pop_unemployed_col / !!pop_civ_lab_force_col) * 100,
-            !!pct_pop_distressed_col := (!!pop_distressed_col / !!tot_pop_est_col) * 100,
             !!pct_hhs_no_vehicles_col := (!!hhs_no_vehicles_est_col / !!tot_hhs_est_col) * 100,
             !!pct_developed_col := (!!developed_col / !!area_col) * 100,
             !!pct_natural_barren_col := (!!natural_barren_col / !!area_col) * 100,
@@ -1104,7 +1092,7 @@ gather_data <- function(lc_file, year, geog) {
 }
 ```
 
-### Tract-Level Distressed Population and Land Cover Change Data
+### Tract-Level Population and Land Cover Change Data
 
 ```{r combine_tract_land_cover_chg_distressed, warning=F, message=F}
 # get full counties sfs for 2010 and 2019 and fill NA with 0, then join them into a single sf
@@ -1126,7 +1114,6 @@ final_tracts_df <-
     pct_median_income_chg = ((median_income_2019 - median_income_2010) / median_income_2010) * 100,
     pct_below_poverty_chg = ((pct_below_poverty_2019 - pct_below_poverty_2010) / pct_below_poverty_2010) * 100,
     pct_unemployed_chg = ((pct_unemployed_2019 - pct_unemployed_2010) / pct_unemployed_2010)  * 100,
-    pct_pop_distressed_chg = ((pct_pop_distressed_2019 - pct_pop_distressed_2010) / pct_pop_distressed_2010) * 100,
     pct_hhs_no_vehicles_chg = ((pct_hhs_no_vehicles_2019 - pct_hhs_no_vehicles_2010) / pct_hhs_no_vehicles_2010) * 100,
     pct_developed_chg = ((pct_developed_area_sqmi_2019 - pct_developed_area_sqmi_2010) / pct_developed_area_sqmi_2010) * 100,
     pct_natural_barren_chg = ((pct_natural_barren_area_sqmi_2019 - pct_natural_barren_area_sqmi_2010) / pct_natural_barren_area_sqmi_2010) * 100,
@@ -1143,7 +1130,9 @@ final_tracts_df[is.na(final_tracts_df)] <- 0
 
 # display county-level table of data
 final_tracts_df %>%
-  select(NAME, county, grep('chg', colnames(.), value = TRUE)) %>%
+  select(NAME, county, grep('chg', colnames(.), value = TRUE), contains('Became'), contains('Improved')) %>%
+  relocate(if_Became_Distressed_2010_2019, .after = pct_below_poverty_chg) %>%
+  relocate(if_Distressed_Then_Improved_2010_2019, .after = if_Became_Distressed_2010_2019) %>%
   mutate(NAME = str_split(.$NAME, ',', simplify = TRUE)) %>%
   st_drop_geometry() %>%
   gt(groupname_col = 'county') %>%
@@ -1161,8 +1150,9 @@ final_tracts_df %>%
     pct_median_age_chg = md('**% Median Age Change**'),
     pct_median_income_chg = md('**% Median Income Change**'),
     pct_below_poverty_chg = md('**% Pop Below Poverty Change**'),
+    if_Became_Distressed_2010_2019 = md('**If Became Distressed**'),
+    if_Distressed_Then_Improved_2010_2019 = md('**If Improved**'),
     pct_unemployed_chg = md('**% Unemployment Rate Change**'),
-    pct_pop_distressed_chg = md('**% Pop Distressed Change**'),
     pct_hhs_no_vehicles_chg = md('**% HHs No Vehicle Change**'),
     pct_developed_chg = md('**% Developed Change**'),
     pct_natural_barren_chg = md('**% Natural Barren Change**'),
@@ -1270,7 +1260,7 @@ heatmaply(
 # create data frame of correlation coefficients between 
 # pct distressed pop chg and other variables
 tract_cor.df <- melt(tract_correlations) %>% 
-  filter(Var1 == 'pct_pop_distressed_chg', Var2 != 'pct_pop_distressed_chg') %>%
+  filter(Var1 == 'pct_pop_chg', Var2 != 'pct_pop_chg') %>%
   select(-Var1) %>%
   rename(
     Variable = Var2,
@@ -1281,7 +1271,7 @@ tract_cor.df <- melt(tract_correlations) %>%
 # display table of correlation with pct distressed pop chg in descending order of correlation
 tract_cor.df %>%
   gt() %>%
-  tab_header(title = md('**Tract-Level Correlation with Percent Distressed Population Change**')) %>%
+  tab_header(title = md('**Tract-Level Correlation with Percent Population Change**')) %>%
   cols_align(align = 'center') %>%
   cols_label(
     Variable = md('**Variable**'),
@@ -1292,13 +1282,13 @@ tract_cor.df %>%
 
 The most significant correlation is between population change and household change, which has a direct relationship. Other strong correlations are between poverty rate change and water area change which have a strong positive correlation, as well as the change in percentage of households with no vehicle and wetland area change which have a strong negative correlation.
 
-The change in distressed population variable is not strongly correlated with any of the other percentage change variables, with cropland area change being the strongest relationship. Even then, the relationship is mild at best.
+The change in population variable is not strongly correlated with any of the other percentage change variables, with the exception of the percentage change in households.
 
 # Conclusions
 
 This study was severely limited in the variables that were analyzed, since the study was centered around an analysis of the distressed population based on the two-variable criteria outlined by the Appalachian Regional Commission. A much deeper statistical analysis of the Southern Tier could be conducted to evaluate additional trends and gain better insights into the area, like the study by Ludke et al. (2012) which considered many other demographic variables such as employment by worker class and occupation, educational attainment, dependency ratio, marital status, and more granular poverty level variables (e.g., individual poverty, childhood poverty, senior adult poverty, and female household poverty). This study was also limited in its methodology related to the land cover change analysis. Methods employed by KC et al. (2024) in their analysis of eastern Kentucky would allow for better identification of land cover changes and how it changed, including the use of a random tree classifier, hot spot analysis, and the creation of a map of the areas that changed and what the land became.
 
-The ACS 5-year data sets are generally viewed as the most accurate given the larger sample sizes. There could still be questions regarding the accuracy of certain estimates in many of the census tracts included in this study, especially in rural census tracts with smaller populations and larger margins of error. Despite this possible limitation, this study is still able to provide some valuable insights into how the New York Southern Tier region has changed between 2010 and 2019. Land cover did not change too drastically, with the largest changes being the additional 3.4 square miles of natural barren land and the 2.9 square miles of land that are no longer grasslands in the entire 14-county study area. There were no significant relationships between the change in distressed population proportion and changes in land cover and other population variables, suggesting that one could not accurately predict how a census tract's population and land cover change based on the change in its proportion of people living in distressed areas. While median family income increased in all counties, every county except Tompkins County became older, less populated, and more distressed. Built-up areas in the Southern Tier (especially Binghamton, Jamestown, Dunkirk, Elmira, and Salamanca) are considerably more distressed than rural areas, with Ithaca and Oneonta being the only cities that do not have a significant risk.
+The ACS 5-year data sets are generally viewed as the most accurate given the larger sample sizes. There could still be questions regarding the accuracy of certain estimates in many of the census tracts included in this study, especially in rural census tracts with smaller populations and larger margins of error. Despite this possible limitation, this study is still able to provide some valuable insights into how the New York Southern Tier region has changed between 2010 and 2019. Land cover did not change too drastically, with the largest changes being the additional 3.4 square miles of natural barren land and the 2.9 square miles of land that are no longer grasslands in the entire 14-county study area. There were no significant relationships between the change in population and changes in land cover and other population variables, suggesting that one could not accurately predict how a census tract's population and land cover change based on the rate of population change. While median family income increased in all counties, every county except Tompkins County became older, less populated, and more distressed. Built-up areas in the Southern Tier (especially Binghamton, Jamestown, Dunkirk, Elmira, and Salamanca) are considerably more distressed than rural areas, with Ithaca and Oneonta being the only cities that do not have a significant risk.
 
 On top of what has already been mentioned regarding other methods that could be used, a study that also evaluates the 14-county study area in the post-COVID era (2020 - present) could offer valuable information about how the demographics of the Southern Tier have changed further since the onset of the pandemic, and if COVID has increased the number of distressed people.
 
