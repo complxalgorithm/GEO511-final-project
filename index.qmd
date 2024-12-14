@@ -295,7 +295,7 @@ ggplot(st_tracts, aes(median_incomeE, pct_below_poverty, color = county)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-There is a clear negative relationship between median family income and percent below poverty level, where tracts that have higher median family incomes tend to have a lower percentage of people below poverty. Most of the outliers for each year are in Allegany County.
+There is a clear negative relationship between median family income and percent below poverty level, where tracts that have higher median family incomes tend to have a lower percentage of people below poverty. Most of the outliers for each year are in Tompkins County.
 
 ##### Remaining Census Tract Data
 
@@ -497,7 +497,7 @@ st_counties.2010_2019 <-
 
 #### Land Cover Set Up
 
-```{r land_cover_setup, message=F, warning=F, error=F}
+```{r land_cover_setup, message=F, warning=F}
 # set urls to land cover images
 url_2010 <- 'https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/lcmap/public/full_extent_downloads/version_13/primary-landcover_conus_year_data/LCMAP_CU_2010_V13_LCPRI/LCMAP_CU_2010_V13_LCPRI.tif'
 url_2019 <- 'https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/lcmap/public/full_extent_downloads/version_13/primary-landcover_conus_year_data/LCMAP_CU_2019_V13_LCPRI/LCMAP_CU_2019_V13_LCPRI.tif'
@@ -1290,7 +1290,7 @@ This study was severely limited in the variables that were analyzed, since the s
 
 The ACS 5-year data sets are generally viewed as the most accurate given the larger sample sizes. There could still be questions regarding the accuracy of certain estimates in many of the census tracts included in this study, especially in rural census tracts with smaller populations and larger margins of error. Despite this possible limitation, this study is still able to provide some valuable insights into how the New York Southern Tier region has changed between 2010 and 2019. Land cover did not change too drastically, with the largest changes being the additional 3.4 square miles of natural barren land and the 2.9 square miles of land that are no longer grasslands in the entire 14-county study area. There were no significant relationships between the change in population and changes in land cover and other population variables, suggesting that one could not accurately predict how a census tract's population and land cover change based on the rate of population change. While median family income increased in all counties, every county except Tompkins County became older, less populated, and more distressed. Built-up areas in the Southern Tier (especially Binghamton, Jamestown, Dunkirk, Elmira, and Salamanca) are considerably more distressed than rural areas, with Ithaca and Oneonta being the only cities that do not have a significant risk.
 
-On top of what has already been mentioned regarding other methods that could be used, a study that also evaluates the 14-county study area in the post-COVID era (2020 - present) could offer valuable information about how the demographics of the Southern Tier have changed further since the onset of the pandemic, and if COVID has increased the number of distressed people.
+The distressed population for each individual census tract could be calculated by determining the distressed status of the block groups within each census tract, and then summing up the total population that lives within distressed block groups in each census tract. Also, a separate study that evaluates the 14-county Southern Tier region in the post-COVID era (2020 - present) could offer valuable information about how the demographics of the Southern Tier have changed further since the onset of the pandemic, and if COVID has increased the number of distressed people.
 
 # References
 
